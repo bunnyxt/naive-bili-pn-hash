@@ -80,6 +80,7 @@ def routine_update_via_tid_task(tid):
 
 
 def routine_update_via_tid_start(tid):
+    routine_update_via_tid_task(tid)
     schedule.every(10).minutes.do(routine_update_via_tid_task, tid)
 
     while True:
