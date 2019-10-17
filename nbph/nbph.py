@@ -1,5 +1,6 @@
 from db import DBOperation
 from pybiliapi import *
+import math
 
 __all__ = ['get_pn', 'test_pn']
 
@@ -21,7 +22,7 @@ def get_pn(aid, session):
         print('Fail to count later video!')
         return None
 
-    pn = count_later // 50 + 1
+    pn = math.ceil(count_later / 50)
     return pn
 
 
