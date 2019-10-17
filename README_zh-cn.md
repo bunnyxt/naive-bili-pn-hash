@@ -6,9 +6,9 @@
 
 ## 介绍
 
-为了获取哔哩哔哩视频的档案信息，通常使用"view"api(https://api.bilibili.com/x/web-interface/view?aid=456930)或者"stat"api(https://api.bilibili.com/x/web-interface/archive/stat?aid=456930)。然而，这两个api都会限制访问频率。如果访问频率过高，IP将会被锁定若干小时。
+为了获取哔哩哔哩视频的档案信息，通常使用"view"api(https://api.bilibili.com/x/web-interface/view?aid=456930) 或者"stat"api(https://api.bilibili.com/x/web-interface/archive/stat?aid=456930) 。然而，这两个api都会限制访问频率。如果访问频率过高，IP将会被锁定若干小时。
 
-相反，"无敌"api(https://api.bilibili.com/archive_rank/getarchiverankbypartion?jsonp=jsonp&tid=30&pn=1&ps=50)不会锁IP。这个api接收三个参数：
+相反，"无敌"api(https://api.bilibili.com/archive_rank/getarchiverankbypartion?jsonp=jsonp&tid=30&pn=1&ps=50) 不会锁IP。这个api接收三个参数：
 
 - tid: 类型id
 - pn: 页码
