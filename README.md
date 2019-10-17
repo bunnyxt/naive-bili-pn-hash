@@ -20,7 +20,7 @@ If we could know the tid and pn value in which page aid appears, we can the vide
 
 ## Installation
 
-### 01 Download programe file
+### 01 Download program file
 
 ```
 git clone https://github.com/bunnyxt/naive-bili-pn-hash
@@ -28,7 +28,7 @@ git clone https://github.com/bunnyxt/naive-bili-pn-hash
 
 ### 02 Set up environment
 
-You need Python 3.5+ to run this programe. We strongly suggest use virtualenv or anaconda to manage your virtual python environment! For example, if you use virtualenv, you can set up your virtual environment and install requirements like this.
+You need Python 3.5+ to run this program. We strongly suggest use virtualenv or anaconda to manage your virtual python environment! For example, if you use virtualenv, you can set up your virtual environment and install requirements like this.
 
 ```shell
 virtualenv venv  # set up new virtual environment
@@ -49,7 +49,7 @@ port = 3306
 dbname = nbph
 ```
 
-By default, this programe use MySQL and you can change it to any other database by yourself. 
+By default, this program use MySQL and you can change it to any other database by yourself. 
 
 ## Usage
 
@@ -142,7 +142,7 @@ Code of this naive api also included in this repo. See it here: [webapi/nbph.php
 
 - Use logging module to manage log.
 - Add script to delete invalid aid cached locally.
-- Optimize SQL to imporve performance.
+- Optimize SQL to improve performance.
 
 Issues are welcome!
 
@@ -150,6 +150,6 @@ Issues are welcome!
 
 All by [bunnyxt](https://www.bunnyxt.com)
 
-Disgussion QQ group: [537793686](https://jq.qq.com/?_wv=1027&k=588s7nw)
+Discussion QQ group: [537793686](https://jq.qq.com/?_wv=1027&k=588s7nw)
 
 **DO NOT ABUSE BILIBILI API!!!**
