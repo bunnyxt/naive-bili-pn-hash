@@ -1,14 +1,18 @@
-from pybiliapi import *
-import time
-
+from db import Session
+from nbph import *
 
 if __name__ == '__main__':
-    bapi = BiliApi()
-    for i in range(364108, 540768, 3):
-        obj = bapi.get_video_view(i)
-        if obj['code'] == 0:
-            pubdate = int(obj['data']['pubdate'])
-            ctime = int(obj['data']['ctime'])
-            if pubdate != ctime:
-                print(i, pubdate, ctime)
-    time.sleep(0.2)
+    # get db session
+    session = Session()
+
+    # get pn via aid
+    aid = 456930
+    pn = get_pn(aid, session)
+    print('aid = %d, pn = %d' % (aid, pn))
+
+    # test pn
+    index = test_pn(aid, 30, pn)
+    if index == -1:
+        print('test fail! aid = %d not in pn = %d!' % (aid, pn))
+    else:
+        print('test success! aid = %d in pn = %d with index %d!' % (aid, pn, index))
