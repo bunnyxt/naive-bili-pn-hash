@@ -5,16 +5,16 @@ import sys
 import threading
 import time
 from util import create_time_to_ts
+from logger import logger_02
 
 
 def routine_update_via_tid(tid):
-    print('Now start routine update %d tid...' % tid)
-    print(time.time())
+    logger_02.info('Now start routine update %d tid...' % tid)
 
     # get last aid
     session = Session()
     last_aids = list(map(lambda x: x.aid, DBOperation.query_last_x_aid_via_tid(tid, 10, session)))
-    print('last aids: %s' % last_aids)  # avoid last aid deleted
+    logger_02.info('Get last aids: %s' % last_aids)  # avoid last aid deleted
 
     # get page total
     bapi = BiliApi()
@@ -30,6 +30,15 @@ def routine_update_via_tid(tid):
     new_video_count = 0
     while page_num <= page_total and goon:
         obj = bapi.get_archive_rank_by_partion(tid, page_num, 50)
+        while True:
+            try:
+                for _ in obj['data']['archives']:
+                    pass
+                break
+            except TypeError:
+                logger_02.warning('TypeError caught, re-call page_num = %d' % page_num)
+                time.sleep(1)
+                obj = bapi.get_archive_rank_by_partion(tid, page_num, 50)
         try:
             aid_list = []
             video_list = []
@@ -38,7 +47,7 @@ def routine_update_via_tid(tid):
                 create = arch['create']
 
                 if aid in last_aids:
-                    print('Meet aid = %d in last_aids, break' % aid)
+                    logger_02.info('Meet aid = %d in last_aids, break.' % aid)
                     goon = False
                     break
 
@@ -54,24 +63,24 @@ def routine_update_via_tid(tid):
                     create_ts += last_create_ts_offset
                     video = Video(aid=aid, tid=tid, create=create_ts)
                     new_video_count += 1
-                    print('Add new video %s' % video)
+                    logger_02.info('Add new video %s' % video)
                     video_list.append(video)
                     aid_list.append(aid)
                 else:
-                    print('%d already added!' % aid)
+                    logger_02.warning('Aid %d already added!' % aid)
             DBOperation.add_all(video_list, session)
             last_aid_list = aid_list
             page_total = int(obj['data']['page']['count'] / 50) + 1
-            print('%d / %d done' % (page_num, page_total))
+            # logger_02.info('%d / %d done' % (page_num, page_total))
         except Exception as e:
-            print(e)
+            logger_02.error('Exception caught. Detail: %s' % e)
         page_num += 1
 
     if new_video_count == 0:
-        print('No new video found with %d tid' % tid)
+        logger_02.info('No new video found with %d tid.' % tid)
     else:
-        print('%d new video found with %d tid' % (new_video_count, tid))
-    print('Finish routine update %d tid.\n' % tid)
+        logger_02.info('%d new video(s) found with %d tid.' % (new_video_count, tid))
+    logger_02.info('Finish routine update %d tid.' % tid)
     session.close()
 
 
@@ -88,14 +97,18 @@ def routine_update_via_tid_start(tid):
         time.sleep(10)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) == 2:
         tid = int(sys.argv[1])
-        print('Now start routine update via tid %d...' % tid)
+        logger_02.info('Now start routine update via tid %d...' % tid)
 
         routine_update_via_tid_start(tid)
 
-        print('Stopped!')
+        logger_02.info('Routine update stopped!')
     else:
-        print('[Error] No tid assigned!')
+        logger_02.error('No tid assigned!')
         exit(-1)
+
+
+if __name__ == '__main__':
+    main()
