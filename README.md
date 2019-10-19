@@ -140,7 +140,7 @@ Code of this naive api also included in this repo. See it here: [webapi/nbph.php
 
 ## TODO
 
-- Use logging module to manage log.
+- Use logging module to manage log. ✅ Done! See in [logger](logger/logger.py)
 - Add script to delete invalid aid cached locally.
 - Optimize SQL to improve performance.
 

@@ -140,7 +140,7 @@ URL: [http://api.bunnyxt.com/nbph/nbph.php?aid=456930](http://api.bunnyxt.com/nb
 
 ## TODO
 
-- 使用logging模块管理日志。
+- 使用logging模块管理日志。✅完成！详见[logger](logger/logger.py)
 - 添加自动删除失效视频的脚本。
 - 优化SQL语句，提高系统效率。
 
