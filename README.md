@@ -97,7 +97,7 @@ Then, the ceiling of count number div 50 is the pn we need.
 pn = math.ceil(count / 50)
 ```
 
-You can use `get_pn(aid, session)` function to get pn via aid and test it via `test_pn(aid, tid, pn)` function. You can see the usage of them in `test.py` file.
+You can use `get_tid_pn(aid, session)` function to get tid and pn via aid and test it via `test_pn(aid, tid, pn)` function. You can see the usage of them in `test.py` file.
 
 ```python
 from db import Session
@@ -109,11 +109,11 @@ if __name__ == '__main__':
 
     # get pn via aid
     aid = 456930
-    pn = get_pn(aid, session)
-    print('aid = %d, pn = %d' % (aid, pn))
+    tid, pn = get_tid_pn(aid, session)
+    print('aid = %d, tid = %d, pn = %d' % (aid, tid, pn))
 
     # test pn
-    index = test_pn(aid, 30, pn)
+    index = test_pn(aid, tid, pn)
     if index == -1:
         print('test fail! aid = %d not in pn = %d!' % (aid, pn))
     else:

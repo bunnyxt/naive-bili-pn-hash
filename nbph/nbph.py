@@ -2,10 +2,10 @@ from db import DBOperation
 from pybiliapi import *
 import math
 
-__all__ = ['get_pn', 'test_pn']
+__all__ = ['get_tid_pn', 'test_pn']
 
 
-def get_pn(aid, session):
+def get_tid_pn(aid, session):
     # query video
     video = DBOperation.query_video_via_aid(aid, session)
     if video is None:
@@ -23,7 +23,7 @@ def get_pn(aid, session):
         return None
 
     pn = math.ceil(count_later / 50)
-    return pn
+    return tid, pn
 
 
 def test_pn(aid, tid, pn):

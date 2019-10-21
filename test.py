@@ -7,11 +7,11 @@ if __name__ == '__main__':
 
     # get pn via aid
     aid = 456930
-    pn = get_pn(aid, session)
-    print('aid = %d, pn = %d' % (aid, pn))
+    tid, pn = get_tid_pn(aid, session)
+    print('aid = %d, tid = %d, pn = %d' % (aid, tid, pn))
 
     # test pn
-    index = test_pn(aid, 30, pn)
+    index = test_pn(aid, tid, pn)
     if index == -1:
         print('test fail! aid = %d not in pn = %d!' % (aid, pn))
     else:
