@@ -121,8 +121,9 @@ def routine_update_via_tid(tid):
                 page_aids = [v['aid'] for v in obj['data']['archives']]
 
                 # get db aids
-                create_ts_from = create_time_to_ts(obj['data']['archives'][0]['create']) + 59
-                create_ts_to = create_time_to_ts(obj['data']['archives'][-1]['create'])
+                # TODO check
+                create_ts_from = create_time_to_ts(obj['data']['archives'][0]['create']) + 59  # bigger one
+                create_ts_to = create_time_to_ts(obj['data']['archives'][-1]['create'])  # smaller one
                 db_videos = DBOperation.query_video_between_create_ts(create_ts_from, create_ts_to, session)
                 db_aids = list(map(lambda x: x.aid, db_videos))
 
@@ -134,9 +135,11 @@ def routine_update_via_tid(tid):
                         invalid_count -= 1
                     else:
                         logger_02.info('Save unsettled aid %d.' % aid)
+                unsettled_diff_aids.clear()
 
                 # get diff
                 diff_aids = [aid for aid in db_aids if aid not in page_aids]
+                new_aids = [aid for aid in page_aids if aid not in db_aids]
 
                 # process diff
                 if len(diff_aids) > 0:
@@ -150,12 +153,35 @@ def routine_update_via_tid(tid):
                         if create_ts_to <= create <= create_ts_to + 59:
                             unsettled_diff_aids.append(aid)
                             logger_02.info('Add aid %d to unsettled list.' % aid)
+                        elif create_ts_from - 59 <= create <= create_ts_from:
+                            # counted in last page
+                            pass
                         else:
                             DBOperation.delete_video_via_aid(aid, session)
                             logger_02.info('Delete invalid aid %d.' % aid)
                             invalid_count -= 1
                 else:
                     logger_02.info('No diff aid!')
+
+                # process new
+                last_create_ts = 0
+                last_create_ts_offset = 59
+                for aid in new_aids:
+                    for arch in obj['data']['archives']:
+                        if arch['aid'] == aid:
+                            create = arch['create']
+                            create_ts = create_time_to_ts(create)
+                            if create_ts == last_create_ts:
+                                if last_create_ts_offset > 0:
+                                    last_create_ts_offset -= 1
+                            else:
+                                last_create_ts = create_ts
+                                last_create_ts_offset = 59
+                            create_ts += last_create_ts_offset
+                            video = Video(aid=aid, tid=tid, create=create_ts)
+                            logger_02.info('Add new video %s.' % video)
+                            DBOperation.add(video, session)
+                            break
 
                 page_total = math.ceil(obj['data']['page']['count'] / 50)
                 logger_02.info('Page %d / %d done, %d invalid aid left.' % (page_num, page_total, invalid_count))
