@@ -11,6 +11,15 @@ from logger import logger_02
 is_updating = False
 
 
+def is_aid_valid(aid):
+    bapi = BiliApi()
+    view = bapi.get_video_view(aid)
+    if view['code'] == 0:
+        return True
+    else:
+        return False
+
+
 def routine_update_via_tid(tid):
     global is_updating
 
@@ -141,18 +150,25 @@ def routine_update_via_tid(tid):
                     if aid not in page_aids:
                         # query create time
                         create = -1
-                        for v in db_videos:
-                            if v.aid == aid:
-                                create = v.create
-                                break
+                        if aid in db_aids:
+                            for v in db_videos:
+                                if v.aid == aid:
+                                    create = v.create
+                                    break
+                        else:
+                            logger_02.warning('Cannot find unsettled diff aid %d in db_aids %s!' % (aid, db_aids))
                         if create_ts_to <= create <= create_ts_to + 59:
                             # maybe in next page
                             logger_02.info('Remain aid %d in unsettled list.' % aid)
                         else:
                             DBOperation.delete_video_via_aid(aid, session)
+
                             logger_02.info('Delete unsettled invalid aid %d.' % aid)
-                            unsettled_diff_aids.remove(aid)
-                            invalid_count -= 1
+                            if is_aid_valid(aid):
+                                logger_02.warning('Aid %d is not invalid! Do not remove it.' % aid)
+                            else:
+                                unsettled_diff_aids.remove(aid)
+                                invalid_count -= 1
                     else:
                         logger_02.info('Save unsettled aid %d.' % aid)
                         unsettled_diff_aids.remove(aid)
@@ -177,9 +193,12 @@ def routine_update_via_tid(tid):
                             # counted in last page
                             pass
                         else:
-                            DBOperation.delete_video_via_aid(aid, session)
                             logger_02.info('Delete invalid aid %d.' % aid)
-                            invalid_count -= 1
+                            if is_aid_valid(aid):
+                                logger_02.warning('Aid %d is not invalid! Do not remove it.' % aid)
+                            else:
+                                DBOperation.delete_video_via_aid(aid, session)
+                                invalid_count -= 1
                 else:
                     logger_02.info('No diff aid!')
 
