@@ -8,9 +8,19 @@ import math
 from util import create_time_to_ts
 from logger import logger_02
 
+is_updating = False
+
 
 def routine_update_via_tid(tid):
+    global is_updating
+
     logger_02.info('Now start routine update %d tid...' % tid)
+
+    if is_updating:
+        logger_02.warning('Last round has not finished, stop this round.')
+        return
+    else:
+        is_updating = True
 
     session = Session()
     bapi = BiliApi()
@@ -121,7 +131,6 @@ def routine_update_via_tid(tid):
                 page_aids = [v['aid'] for v in obj['data']['archives']]
 
                 # get db aids
-                # TODO check
                 create_ts_from = create_time_to_ts(obj['data']['archives'][0]['create']) + 59  # bigger one
                 create_ts_to = create_time_to_ts(obj['data']['archives'][-1]['create'])  # smaller one
                 db_videos = DBOperation.query_video_between_create_ts(create_ts_from, create_ts_to, session)
@@ -130,12 +139,23 @@ def routine_update_via_tid(tid):
                 # process unsettled
                 for aid in unsettled_diff_aids:
                     if aid not in page_aids:
-                        DBOperation.delete_video_via_aid(aid, session)
-                        logger_02.info('Delete unsettled invalid aid %d.' % aid)
-                        invalid_count -= 1
+                        # query create time
+                        create = -1
+                        for v in db_videos:
+                            if v.aid == aid:
+                                create = v.create
+                                break
+                        if create_ts_to <= create <= create_ts_to + 59:
+                            # maybe in next page
+                            logger_02.info('Remain aid %d in unsettled list.' % aid)
+                        else:
+                            DBOperation.delete_video_via_aid(aid, session)
+                            logger_02.info('Delete unsettled invalid aid %d.' % aid)
+                            unsettled_diff_aids.remove(aid)
+                            invalid_count -= 1
                     else:
                         logger_02.info('Save unsettled aid %d.' % aid)
-                unsettled_diff_aids.clear()
+                        unsettled_diff_aids.remove(aid)
 
                 # get diff
                 diff_aids = [aid for aid in db_aids if aid not in page_aids]
@@ -179,7 +199,7 @@ def routine_update_via_tid(tid):
                                 last_create_ts_offset = 59
                             create_ts += last_create_ts_offset
                             video = Video(aid=aid, tid=tid, create=create_ts)
-                            logger_02.info('Add new video %s.' % video)
+                            logger_02.warning('Add new video %s during finding invalid aid.' % video)
                             DBOperation.add(video, session)
                             break
 
@@ -195,6 +215,7 @@ def routine_update_via_tid(tid):
 
     logger_02.info('Finish routine update %d tid.\n' % tid)
     session.close()
+    is_updating = False
 
 
 def routine_update_via_tid_task(tid):
