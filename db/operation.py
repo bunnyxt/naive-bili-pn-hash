@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError as SqlalchemyIntegrityError
 from pymysql.err import IntegrityError as PymysqlIntegrityError
 from sqlalchemy.exc import InvalidRequestError
-from .models import Video
+from .models import Video, NbphRecord
 from sqlalchemy import func
 from logger import logger_db
 
@@ -99,3 +99,12 @@ class DBOperation:
         except Exception as e:
             logger_db.error('Exception caught! DBOperation delete_video_via_aid(%r).' % aid, exc_info=True)
             session.rollback()
+
+    @classmethod
+    def query_nbph_record_via_aid(cls, aid, session):
+        try:
+            result = session.query(NbphRecord).filter(NbphRecord.aid == aid).first()
+            return result
+        except Exception as e:
+            logger_db.error('Exception caught! DBOperation query_nbph_record_via_aid(%r).' % aid, exc_info=True)
+            return None
